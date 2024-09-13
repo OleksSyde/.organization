@@ -1,0 +1,13 @@
+{
+  "name": "Test Team",
+  "slug": "test-team",
+  "description": "All OleksSyde people",
+  "notification_setting": "notifications_enabled",
+  "repositories": {
+    "test-*": "maintain"
+  },
+  "members": [
+    "d1c0br4z",
+    "zhyian"
+  ]
+}

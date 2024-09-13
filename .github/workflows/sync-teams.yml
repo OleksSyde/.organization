@@ -1,0 +1,21 @@
+name: Sync GitHub Teams
+
+on:
+  push:
+    paths:
+      - 'teams/**/*.json'
+  workflow_dispatch:
+
+jobs:
+  sync-teams:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Sync GitHub Team
+        uses: ./.github/actions/org-management
+        with:
+          github-token: ${{ secrets.ORG_MANAGEMENT_TOKEN }}
+          config-path: './teams/syde.json'
+          org-name: 'inpsyde'

@@ -1,0 +1,15 @@
+name: 'GitHub Organization Management'
+description: 'Manage GitHub teams, members, and repository access'
+inputs:
+  github-token:
+    description: 'GitHub token with organization management permissions'
+    required: true
+  config-path:
+    description: 'Path to the team configuration file'
+    required: true
+  org-name:
+    description: 'Name of the GitHub organization'
+    required: true
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
