@@ -70,10 +70,10 @@ async function syncTeam(octokit: ReturnType<typeof github.getOctokit>, orgName: 
     core.info(`Team ${config.name} (ID: ${team.id}) synchronized`)
 
     // Sync team members
-    await syncTeamMembers(octokit, orgName, team.id, config.members)
+    await syncTeamMembers(octokit, orgName, config.slug, config.members)
 
     // Sync team repositories
-    await syncTeamRepositories(octokit, orgName, team.id, config.repositories)
+    await syncTeamRepositories(octokit, orgName, config.slug, config.repositories)
 }
 
 async function createOrUpdateTeam(octokit: ReturnType<typeof github.getOctokit>, orgName: string, config: TeamConfig): Promise<{ id: number }> {
@@ -112,12 +112,12 @@ async function createOrUpdateTeam(octokit: ReturnType<typeof github.getOctokit>,
     }
 }
 
-async function syncTeamMembers(octokit: ReturnType<typeof github.getOctokit>, orgName: string, teamId: number, configMembers: string[]): Promise<void> {
+async function syncTeamMembers(octokit: ReturnType<typeof github.getOctokit>, orgName: string, teamSlug: string, configMembers: string[]): Promise<void> {
     try {
         // Get current team members
         const { data: currentMembers } = await octokit.rest.teams.listMembersInOrg({
             org: orgName,
-            team_slug: teamId.toString(),
+            team_slug: teamSlug,
         });
 
         const currentMemberLogins = currentMembers.map(member => member.login);
@@ -131,7 +131,7 @@ async function syncTeamMembers(octokit: ReturnType<typeof github.getOctokit>, or
                 try {
                     await octokit.rest.teams.addOrUpdateMembershipForUserInOrg({
                         org: orgName,
-                        team_slug: teamId.toString(),
+                        team_slug: teamSlug,
                         username: member,
                     });
                     core.info(`Added ${member} to the team`);
@@ -147,7 +147,7 @@ async function syncTeamMembers(octokit: ReturnType<typeof github.getOctokit>, or
                 try {
                     await octokit.rest.teams.removeMembershipForUserInOrg({
                         org: orgName,
-                        team_slug: teamId.toString(),
+                        team_slug: teamSlug,
                         username: member,
                     });
                     core.info(`Removed ${member} from the team`);
@@ -162,7 +162,7 @@ async function syncTeamMembers(octokit: ReturnType<typeof github.getOctokit>, or
     }
 }
 
-async function syncTeamRepositories(octokit: ReturnType<typeof github.getOctokit>, orgName: string, teamId: number, configRepos: Record<string, string>): Promise<void> {
+async function syncTeamRepositories(octokit: ReturnType<typeof github.getOctokit>, orgName: string, teamSlug: string, configRepos: Record<string, string>): Promise<void> {
     // Get all repositories in the organization
     const allRepos = await octokit.paginate(octokit.rest.repos.listForOrg, {
         org: orgName,
@@ -172,7 +172,7 @@ async function syncTeamRepositories(octokit: ReturnType<typeof github.getOctokit
     // Get current team repositories
     const { data: currentRepos } = await octokit.rest.teams.listReposInOrg({
         org: orgName,
-        team_slug: teamId.toString(),
+        team_slug: teamSlug,
     })
 
     const currentRepoNames = currentRepos.map(repo => repo.name)
@@ -196,7 +196,7 @@ async function syncTeamRepositories(octokit: ReturnType<typeof github.getOctokit
                 // Add repo to team
                 await octokit.rest.teams.addOrUpdateRepoPermissionsInOrg({
                     org: orgName,
-                    team_slug: teamId.toString(),
+                    team_slug: teamSlug,
                     owner: orgName,
                     repo: repoName,
                     permission: permission,
@@ -207,7 +207,7 @@ async function syncTeamRepositories(octokit: ReturnType<typeof github.getOctokit
             // Remove repo from team
             await octokit.rest.teams.removeRepoInOrg({
                 org: orgName,
-                team_slug: teamId.toString(),
+                team_slug: teamSlug,
                 owner: orgName,
                 repo: repoName,
             })
