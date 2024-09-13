@@ -30,5 +30,5 @@ jobs:
         uses: ./.github/actions/org-management
         with:
           github-token: ${{ secrets.ORG_MANAGEMENT_TOKEN }}
-          config-path: './teams/test-team.json'
+          config-path: './teams'
           org-name: 'OleksSyde'

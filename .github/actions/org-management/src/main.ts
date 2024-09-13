@@ -42,10 +42,17 @@ async function run(): Promise<void> {
         const configPath = core.getInput('config-path', { required: true })
         const orgName = core.getInput('org-name', { required: true })
 
-        const config = await getConfig(configPath)
-        validateConfig(config)
+        // Read all JSON files in the directory
+        const files = fs.readdirSync(configPath)
+            .filter(file => file.endsWith('.json'))
+            .map(file => path.join(configPath, file))
 
-        await syncTeam(octokit, orgName, config)
+        for (const file of files) {
+            core.info(`Processing file: ${file}`)
+            const config = await getConfig(file)
+            validateConfig(config)
+            await syncTeam(octokit, orgName, config)
+        }
 
         core.setOutput('result', 'Team synchronization completed successfully')
     } catch (error) {
