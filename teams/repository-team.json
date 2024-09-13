@@ -1,6 +1,6 @@
 {
-  "name": "Test Team",
-  "slug": "test-team",
+  "name": "Repository Team",
+  "slug": "repository-team",
   "description": "All OleksSyde people",
   "notification_setting": "notifications_enabled",
   "repositories": {
