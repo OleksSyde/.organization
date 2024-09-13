@@ -113,36 +113,52 @@ async function createOrUpdateTeam(octokit: ReturnType<typeof github.getOctokit>,
 }
 
 async function syncTeamMembers(octokit: ReturnType<typeof github.getOctokit>, orgName: string, teamId: number, configMembers: string[]): Promise<void> {
-    // Get current team members
-    const { data: currentMembers } = await octokit.rest.teams.listMembersInOrg({
-        org: orgName,
-        team_slug: teamId.toString(),
-    })
+    try {
+        // Get current team members
+        const { data: currentMembers } = await octokit.rest.teams.listMembersInOrg({
+            org: orgName,
+            team_slug: teamId.toString(),
+        });
 
-    const currentMemberLogins = currentMembers.map(member => member.login)
+        const currentMemberLogins = currentMembers.map(member => member.login);
 
-    // Add new members
-    for (const member of configMembers) {
-        if (!currentMemberLogins.includes(member)) {
-            await octokit.rest.teams.addOrUpdateMembershipForUserInOrg({
-                org: orgName,
-                team_slug: teamId.toString(),
-                username: member,
-            })
-            core.info(`Added ${member} to the team`)
+        core.info(`Current team members: ${currentMemberLogins.join(', ')}`);
+        core.info(`Configured members: ${configMembers.join(', ')}`);
+
+        // Add new members
+        for (const member of configMembers) {
+            if (!currentMemberLogins.includes(member)) {
+                try {
+                    await octokit.rest.teams.addOrUpdateMembershipForUserInOrg({
+                        org: orgName,
+                        team_slug: teamId.toString(),
+                        username: member,
+                    });
+                    core.info(`Added ${member} to the team`);
+                } catch (error) {
+                    core.warning(`Failed to add ${member} to the team: ${error instanceof Error ? error.message : String(error)}`);
+                }
+            }
         }
-    }
 
-    // Remove members not in config
-    for (const member of currentMemberLogins) {
-        if (!configMembers.includes(member)) {
-            await octokit.rest.teams.removeMembershipForUserInOrg({
-                org: orgName,
-                team_slug: teamId.toString(),
-                username: member,
-            })
-            core.info(`Removed ${member} from the team`)
+        // Remove members not in config
+        for (const member of currentMemberLogins) {
+            if (!configMembers.includes(member)) {
+                try {
+                    await octokit.rest.teams.removeMembershipForUserInOrg({
+                        org: orgName,
+                        team_slug: teamId.toString(),
+                        username: member,
+                    });
+                    core.info(`Removed ${member} from the team`);
+                } catch (error) {
+                    core.warning(`Failed to remove ${member} from the team: ${error instanceof Error ? error.message : String(error)}`);
+                }
+            }
         }
+    } catch (error) {
+        core.error(`Error synchronizing team members: ${error instanceof Error ? error.message : String(error)}`);
+        throw error;
     }
 }
 
