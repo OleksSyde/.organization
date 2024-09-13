@@ -4,9 +4,9 @@
   "description": "All OleksSyde people",
   "notification_setting": "notifications_enabled",
   "repositories": {
-    "test-*": "maintain"
+    "repository-*": "maintain"
   },
   "members": [
-    "zhyian"
+    "d1c0br4z"
   ]
 }
