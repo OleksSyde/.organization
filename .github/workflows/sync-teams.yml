@@ -8,7 +8,7 @@ on:
 
 permissions:
   contents: read
-  
+
 jobs:
   sync-teams:
     runs-on: ubuntu-latest
