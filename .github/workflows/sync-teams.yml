@@ -6,6 +6,9 @@ on:
       - 'teams/**/*.json'
   workflow_dispatch:
 
+permissions:
+  contents: read
+  
 jobs:
   sync-teams:
     runs-on: ubuntu-latest
